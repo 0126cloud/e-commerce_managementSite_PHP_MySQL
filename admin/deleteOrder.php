@@ -15,7 +15,7 @@ if(isset($_GET['orderId'])){
     $stmt->execute();
 
     if($stmt->rowCount() > 0) {
-        header("Refresh: 3; url=./orders.php");
+        header("Refresh: 1; url=./orders.php");
         // $objResponse['success'] = true;
         // $objResponse['code'] = 200;
         // $objResponse['info'] = "刪除成功";
@@ -24,7 +24,7 @@ if(isset($_GET['orderId'])){
         alert("刪除成功！回到訂單列表哦")</script> <?php
         exit();
     } else {
-        header("Refresh: 3; url=./orders.php");
+        header("Refresh: 1; url=./orders.php");
         // $objResponse['success'] = false;
         // $objResponse['code'] = 400;
         // $objResponse['info'] = "刪除失敗";

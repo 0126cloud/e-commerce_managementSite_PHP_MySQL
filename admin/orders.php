@@ -36,8 +36,10 @@ $page = $page < 1 ? 1 : $page; //若 page 小於 1，則回傳 1
     <td>
     <label for="searchOrders">訂單資料</label>
     <select name="searchOrders" id="searchOrders">
-        <option value="orderId">訂單編號</option>
-        <option value="username">用戶名稱</option>
+        <option value="orderNumber">訂單編號</option>
+        <option value="ship_name">用戶名稱</option>
+        <option value="itemName">商品名稱</option>
+        <option value="courseName">課程名稱</option>
         <option value="paymentMethod">付款方式</option>
         <option value="paymentStatus">付款狀態</option>
     </select>
@@ -66,9 +68,6 @@ $page = $page < 1 ? 1 : $page; //若 page 小於 1，則回傳 1
                     <div class="py-2 text-uppercase">商品名稱</div>
                 </th>
                 <th scope="col" class="border">
-                    <div class="py-2 text-uppercase">商品種類</div>
-                </th>
-                <th scope="col" class="border">
                     <div class="py-2 text-uppercase">單價</div>
                 </th>
                 <th scope="col" class="border">
@@ -91,10 +90,9 @@ $page = $page < 1 ? 1 : $page; //若 page 小於 1，則回傳 1
         </thead>
         <tbody>
         <?php
-        $sqlOrder = "SELECT `orders`.`orderId`,`orders`.`username`,`orders`.`totalPrice`,`orders`.`paymentStatus`,`orders`.`created_at`,`orders`.`updated_at`, `payment`.`paymentMethod`
-                    FROM `orders` INNER JOIN `payment`
-                    ON `orders`.`paymentId` = `payment`.`paymentId`
-                    ORDER BY `orders`.`orderId` ASC
+        $sqlOrder = "SELECT `orders`.`orderId`,`orders`.`orderNumber`,`orders`.`ship_name`,`orders`.`totalPrice`,`orders`.`paymentStatus`,`orders`.`created_at`,`orders`.`updated_at`, `orders`.`paymentMethod`
+                    FROM `orders`
+                    ORDER BY `orders`.`orderNumber` DESC
                     LIMIT ?, ?";
 
         //設定繫結值
@@ -109,18 +107,14 @@ $page = $page < 1 ? 1 : $page; //若 page 小於 1，則回傳 1
             for($i = 0; $i < count($arrOrders); $i++) {
         ?>
             <tr>
-                <th scope="row" class="border"><?php echo $arrOrders[$i]["orderId"] ?></th>
-                <td class="border"><?php echo $arrOrders[$i]["username"] ?></td>
+                <th scope="row" class="border"><?php echo $arrOrders[$i]["orderNumber"] ?></th>
+                <td class="border"><?php echo $arrOrders[$i]["ship_name"] ?></td>
                 <td class="border"><?php echo $arrOrders[$i]["paymentMethod"] ?></td>
                 <td class="border">
                 <?php
                 $sqlItemList = "SELECT `order_lists`.`checkPrice`,`order_lists`.`checkQuantity`,`order_lists`.`checkSubtotal`,
-                                        `items`.`itemName`,`category`.`categoryName`
+                                        `order_lists`.`itemName`,`order_lists`.`courseName`
                                 FROM `order_lists` 
-                                INNER JOIN `items`
-                                ON `order_lists`.`itemId` = `items`.`itemId`
-                                INNER JOIN `category` 
-                                ON `items`.`itemCategoryId` = `category`.`categoryId`
                                 WHERE `order_lists`.`orderId` = ? 
                                 ORDER BY `order_lists`.`orderListId` ASC";
                 $stmtItemList = $pdo->prepare($sqlItemList);
@@ -132,26 +126,18 @@ $page = $page < 1 ? 1 : $page; //若 page 小於 1，則回傳 1
                 if($stmtItemList->rowCount() > 0) {
                     $arrItemList = $stmtItemList->fetchAll(PDO::FETCH_ASSOC);
                     for($j = 0; $j < count($arrItemList); $j++) {
+                        if($arrItemList[$j]["itemName"]) {
                 ?>
                     <p><?php echo $arrItemList[$j]["itemName"] ?></p>
-                    <!-- <p>商品種類: <?php echo $arrItemList[$j]["categoryName"] ?></p>
-                    <p>單價: <?php echo $arrItemList[$j]["checkPrice"] ?></p>
-                    <p>數量: <?php echo $arrItemList[$j]["checkQuantity"] ?></p>
-                    <p>小計: <?php echo $arrItemList[$j]["checkSubtotal"] ?></p>
-                    <br /> -->
+
+                    <?php
+                    }  ?>
+
+                    <p><?php echo $arrItemList[$j]["courseName"] ?></p>
                 <?php
                     }
                 }
                 ?>
-                </td>
-                <td class="border">
-                    <?php
-                        for($j = 0; $j < count($arrItemList); $j++) {
-                    ?>
-                        <p><?php echo $arrItemList[$j]["categoryName"] ?></p>
-                    <?php
-                    }
-                    ?>
                 </td>
 
                 <td class="border">
